@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Quest for the Lost Verbs</title>
+    <style>
+        /* Basic styles for the game */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            margin: 0 auto;
+            max-width: 600px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1, h2, p {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #options button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 5px;
+            background-color: #050000;
+            border: 1px solid #110c0c;
+            cursor: pointer;
+        }
+        #options button.correct {
+            background-color: #0fb335;
+        }
+        #options button.wrong {
+            background-color: #d73543;
+        }
+        #score {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        #nextButton {
+            display: none;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: rgb(13, 1, 1);
+            border: none;
+            cursor: pointer;
+        }
+        #nextButton:hover {
+            background-color: #0056b3;
+        }
+        #badges {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Homepage -->
+    <div class="container" id="home">
+        <h1>Welcome to Quest for the Lost Verbs!</h1>
+        <p>Enter your name to start the game:</p>
+        <input type="text" id="userName" placeholder="Enter your name">
+        <button onclick="startGame()">Start the Game</button>
+    </div>
+
+    <!-- Game Container -->
+    <div class="container" id="game" style="display: none;">
+        <h2 id="greeting"></h2>
+        <div id="question"></div>
+        <div id="options"></div>
+        <div id="score"></div>
+        <button id="nextButton" onclick="nextQuestion()">Next Question</button>
+    </div>
+
+    <!-- End Game -->
+    <div class="container" id="endGame" style="display: none;">
+        <h2>Congratulations, you completed the game!</h2>
+        <p>Your final score: <span id="finalScore"></span></p>
+        <div id="badges"></div>
+        <button onclick="restartGame()">Play Again</button>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userName = "";
+
+        const questions = [
+            {
+                question: "What does 'pick up' mean?",
+                options: ['Start', 'Lift', 'Continue', 'Collect'],
+                correctAnswer: 'Lift'
+            },
+            {
+                question: "What does 'run into' mean?",
+                options: ['Crash', 'Meet unexpectedly', 'Run away', 'Run fast'],
+                correctAnswer: 'Meet unexpectedly'
+            },
+            {
+                question: "What does 'give up' mean?",
+                options: ['Stop trying', 'Give away', 'Put down', 'Start over'],
+                correctAnswer: 'Stop trying'
+            },
+            {
+                question: "What does 'bring up' mean?",
+                options: ['Start a conversation', 'Raise something', 'Lift up', 'Bother someone'],
+                correctAnswer: 'Start a conversation'
+            },
+            {
+                question: "What does 'Hand in ' mean?",
+                options: ['submit', 'keep', 'Throw away', 'Revise'],
+                correctAnswer: 'submit'
+            },
+            {
+                question: "What does 'Make out ' mean?",
+                options: ['ignore', 'understand', 'translate', 'write'],
+                correctAnswer: 'understand'
+            },
+            {
+                question: "What does 'look after ' mean?",
+                options: ['search for', 'take care of', 'avoid', 'talk to'],
+                correctAnswer: 'take care of'
+            },
+            {
+                question: "What does 'get rid of ' mean?",
+                options: ['throw away', 'repair', 'paint', 'hide'],
+                correctAnswer: 'throw away'
+            },
+            {
+                question: "What does 'put off ' mean?",
+                options: ['schedule', 'cancel', 'postpone', 'discuss' ],
+                correctAnswer: 'postpone'
+            },
+            {
+                question: "What does 'fill in ' mean?",
+                options: ['complete', 'destroy', 'translate', 'sign in'],
+                correctAnswer: 'complete'
+            },
+            {
+                question: "What does 'put out ' mean?",
+                options: ['light', 'spread', 'extinguish', 'control'],
+                correctAnswer: 'extinguish'
+            },
+            {
+                question: "What does 'run out of ' mean?",
+                options: ['buy more', 'have none left', 'carry extra', 'overflow'],
+                correctAnswer: 'have none left'
+            },
+            {
+                question: "What does 'take up ' mean?",
+                options: ['quit', 'start', 'change', 'discuss'],
+                correctAnswer: 'start'
+            },
+            {
+                question: "What does 'deal with ' mean?",
+                options: ['handle', 'ignore', 'avoid', 'destroy'],
+                correctAnswer: 'handle'
+            },
+            {
+                question: "What does 'break down ' mean?",
+                options: ['repair', 'stop working', 'improve', 'built'],
+                correctAnswer: 'stop working'
+            },
+            {
+                question: "What does 'turn up ' mean?",
+                options: ['reduce', 'increase', 'arrive', 'change'],
+                correctAnswer: 'arrive'
+            },
+            {
+                question: "What does 'give up' mean?",
+                options: ['continue', 'quit', 'take', 'start'],
+                correctAnswer: 'quit'
+            },
+            {
+                question: "What does 'look forward to' mean?",
+                options: ['expect with pleasure', 'ignore', 'search for', 'delay'],
+                correctAnswer: 'expect with pleasure'
+            },
+            {
+                question: "What does 'carry on ' mean?",
+                options: ['stop', 'continue', 'remove', 'discuss'],
+                correctAnswer: 'continue'
+            },
+            {
+                question: "The teacher asked the students to 'hand in' their homework by friday",
+                options: ['submit', 'keep', 'throw away', 'revise'],
+                correctAnswer: 'submit'
+            },
+            {
+                question: "It was hard to 'make out' what he was saying because of loud music",
+                options: ['ignore', 'understand', 'translate', 'write'],
+                correctAnswer: 'understand'
+            },
+            {
+                question: "Please 'fill in' this form with your personal details",
+                options: ['complete', 'destroy', 'translate', 'sign'],
+                correctAnswer: 'complete'
+            },
+            {
+                question: "The committee decided to do 'away with' outdated policies to make room for new regulations ",
+                options: ['continue using', 'eliminate', 'modify', 'approve'],
+                correctAnswer: 'eliminate'
+            },
+            {
+                question: "Despite her efforts to 'fend off' criticism, jounalist faced backslash from the public",
+                options: ['attract', 'avoid', 'defend', 'welcome'],
+                correctAnswer: 'avoid'
+            },
+            {
+                question: "The manager asked the team to 'iron out' the differences before presenting the project to the client",
+                options: ['increase', 'ignore', 'resolve', 'highlight'],
+                correctAnswer: 'resolve'
+            },
+            {
+                question: "He promised to 'stick up' for his friends if they were ever in trouble",
+                options: ['betray', 'support', 'abandon', 'criticize'],
+                correctAnswer: 'support'
+            },
+            {
+                question: "The scientist managed to 'pull off' a groundbreaking discovery despite the lack of funding",
+                options: ['achieve', 'delay', 'neglect', 'dismiss'],
+                correctAnswer: 'achieve'
+            },
+            {
+                question: "The students need to ' brush up' on their grammar skills before the final exams",
+                options: ['forget', 'revise', 'ignore', 'postpone'],
+                correctAnswer: 'revise'
+            },
+            {
+                question: "The company decided to 'scale back' is production due to declining demand",
+                options: ['increse', 'reduce', 'stop', 'improve'],
+                correctAnswer: 'reduce'
+            },
+            {
+                question: "It took a lot of effort to 'nail down' the exact cause of the system failure",
+                options: ['identity', 'cover up', 'ignore', 'expand'],
+                correctAnswer: 'identity'
+            },
+            {
+                question: "She was completely 'taken aback' by the unexpected turn of events",
+                options: ['surprised', 'annoyed', 'confident', 'disappoint'],
+                correctAnswer: 'surprised'
+            },
+            {
+                question: "The startup had to 'bail out' after facing a significant financial loss",
+                options: ['succeed', 'invest', 'withdraw', 'borrow'],
+                correctAnswer: 'withdraw'
+            }
+            // Additional questions can be added here
+        ];
+
+        function startGame() {
+            userName = document.getElementById('userName').value;
+            if (userName.trim() !== '') {
+                document.getElementById('home').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+                document.getElementById('greeting').innerText = `Welcome, ${userName}! Let's begin your adventure!`;
+                loadQuestion();
+            } else {
+                alert('Please enter your name to start the game.');
+            }
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestionIndex];
+            document.getElementById('question').innerText = question.question;
+            const options = shuffleArray(question.options);
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            options.forEach(option => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.addEventListener('click', () => checkAnswer(option));
+                optionsContainer.appendChild(button);
+            });
+
+            document.getElementById('score').innerText = `Your Score: ${score}`;
+            document.getElementById('nextButton').style.display = 'none';
+        }
+
+        function checkAnswer(selectedOption) {
+            const question = questions[currentQuestionIndex];
+            const correctAnswer = question.correctAnswer;
+
+            const buttons = document.querySelectorAll('#options button');
+            buttons.forEach(button => {
+                if (button.innerText === correctAnswer) {
+                    button.classList.add('correct');
+                } else {
+                    button.classList.add('wrong');
+                }
+                button.disabled = true;
+            });
+
+            if (selectedOption === correctAnswer) {
+                score++;
+            }
+
+            document.getElementById('score').innerText = `Your Score: ${score}`;
+            document.getElementById('nextButton').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('endGame').style.display = 'block';
+            document.getElementById('finalScore').innerText = score;
+
+            const badges = generateBadges(score);
+            document.getElementById('badges').innerHTML = badges.join('');
+        }
+
+        function generateBadges(score) {
+            let badges = [];
+            if (score >= 24) {
+                badges.push('<p>You earned the Master of Verbs badge!</p>');
+            } else if (score >= 16 && score < 24) {
+                badges.push('<p>You earned the Verb Expert badge!</p>');
+            } else if (score >= 10 && score < 16) {
+                badges.push('<p>You earned the Verb Novice badge!</p>');
+            } else {
+                badges.push('<p>Keep trying to earn more badges!</p>');
+            }
+            return badges;
+        }
+
+        function restartGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            document.getElementById('endGame').style.display = 'none';
+            document.getElementById('home').style.display = 'block';
+            document.getElementById('userName').value = '';
+        }
+
+        // Shuffle array helper function
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
